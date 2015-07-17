@@ -66,7 +66,10 @@ build: lll
 lll.o:lll.cpp
 	$(EXEC) $(CC) $(INCLUDES) $(ALL_CCFLAGS) -o $@ -c $<
 
-lll:lll.o 
+polynomial.o:polynomial.cpp
+	$(EXEC) $(CC) $(INCLUDES) $(ALL_CCFLAGS) -o $@ -c $<
+
+lll:lll.o polynomial.o
 	$(EXEC) $(CC) $(ALL_LDFLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p ../bin/$(ARCH)/$(OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ ../bin/$(ARCH)/$(OS)/$(BUILD_TYPE)

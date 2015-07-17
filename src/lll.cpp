@@ -1,4 +1,5 @@
 #include "lll.h"
+#include "polynomial.h"
 
 int main()
 {
@@ -18,11 +19,24 @@ int main()
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(1, 100);
-    std::vector<std::vector<double>> q(40, std::vector<double>(40));
+    /*std::vector<std::vector<double>> q(40, std::vector<double>(40));
     for (int i = 0 ; i < 40; ++i)
         for(int j = 0; j < 40; ++j)
             q[i][j] = dist(mt);
-    LLL(q, 0.75);
+    LLL(q, 0.75); */
+
+    std::vector<int> polya = {2, 5, 7};
+    std::vector<int> polyb = {4,7, 5};
+
+    Polynomial a(polya);
+    Polynomial b(polyb);
+
+    Polynomial c = a.mod(2);
+
+    std::vector<int> polyc = c.get_coefficients();
+    for(int i = 0; i < polyc.size(); i++) 
+        std::cout << polyc[i] << ",";
+
 }
 
 std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, double delta) {
