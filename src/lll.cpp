@@ -14,37 +14,16 @@ int main()
         }
         std::cout << std::endl;
     }
+    
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> dist(1, 100);
+    std::vector<std::vector<double>> q(40, std::vector<double>(40));
+    for (int i = 0 ; i < 40; ++i)
+        for(int j = 0; j < 40; ++j)
+            q[i][j] = dist(mt);
+    LLL(q, 0.75);
 }
-
-/*std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, double delta)
-{
-    const int n = input.size();
-    std::vector<std::vector<double>> b(n, std::vector<double>(input[0].size()));
-    b = size_reduce(input);
-    std::vector<std::vector<double>> B = gram_schmidt(b);
-
-    for(int i = 0; i < n - 1; i++) {
-        std::vector<double> project = projection(B, b[i], i);
-        std::vector<double> projecttwo = projection(B, b[i + 1], i);
-        if(delta * inner_product(project.begin(), project.end(), project.begin()) > inner_product(projecttwo.begin(), projecttwo.end(), projecttwo.begin())) {
-            for(int ii = 0; ii < 3; ii++)
-                std::cout << b[i][ii] << ",";
-            std::cout << std::endl;
-            for(int ii = 0; ii < 3; ii++)
-                std::cout << b[i+1][ii] << ",";
-            std::cout << std::endl;
-            b[i].swap(b[i +1]);
-            for(int ii = 0; ii < 3; ii++)
-                std::cout << b[i][ii] << ",";
-            std::cout << std::endl;
-            for(int ii = 0; ii < 3; ii++)
-                std::cout << b[i+1][ii] << ",";
-            std::cout << std::endl;
-            return LLL(b, delta);
-        }
-    }
-    return b;
-} */
 
 std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, double delta) {
     const int n = input.size();
@@ -62,18 +41,11 @@ std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, dou
 
     int k = 1;
     while (k < n) {
-        std::cout << k << std::endl;
         for(int j = k - 1; j >= 0; j--) {
-            std::cout << j << "," << fabs(l[k][j]) << std::endl;
             if(fabs(l[k][j]) > 0.5) {
-
- 
                 input[k] = vector_sub(input[k], scalar_mult(std::round(l[k][j]), input[j]));
-
                 std::vector<double> tt = scalar_mult(std::round(l[k][j]), input[j]);
-            
-
-
+        
                 B = gram_schmidt(input);
                 for(int ii = 0; ii < n; ii++) {
                     for(int jj = 0; jj < input[0].size(); jj++) {
@@ -114,47 +86,6 @@ std::vector<std::vector<double>> gram_schmidt(std::vector<std::vector<double>> a
     }
     return v;
 }
-
-std::vector<double> nearest_plane(std::vector<std::vector<double>> b, std::vector<double> w) {
-
-    const int n = b.size();
-    
-    std::vector<std::vector<double>> W(n, std::vector<double>(b[0].size()));
-    std::vector<std::vector<double>> y(n, std::vector<double>(b[0].size()));
-
-    std::vector<std::vector<double>> B = gram_schmidt(b);
-
-    W[n -1] = w;
-
-    std::vector<double> l(n);
-    for(int i = n - 1; i > 0; i--) {
-        l[i] = inner_product(W[i].begin(), W[i].end(), B[i].begin()) / inner_product(B[i].begin(), B[i].end(), B[i].begin());
-        y[i] = scalar_mult(std::round(l[i]), b[i]);
-        W[i - 1] = vector_sub(vector_sub(W[i], scalar_mult(l[i] - std::round(l[i]), B[i])), scalar_mult(std::round(l[i]), b[i]) );
-    }
-
-    l[0] = inner_product(W[0].begin(), W[0].end(), B[0].begin()) / inner_product(B[0].begin(), B[0].end(), B[0].begin());
-    y[0] = scalar_mult(std::round(l[0]), b[0]);
-
-    std::vector<double> ans(n, 0);
-    for(int i = 0; i < n; i++) {
-        ans = vector_add(ans, y[i]);
-    }
-    return ans;
-}
-
-std::vector<std::vector<double>> size_reduce(std::vector<std::vector<double>> b) 
-{
-    std::vector<double> x(b[0].size());
-    std::vector<std::vector<double>> B = gram_schmidt(b);
-
-    for(int i = 1; i < b.size(); i++) {
-        x = nearest_plane(b, vector_sub(b[i], B[i]));
-        b[i] = vector_sub(b[i], matrix_mult(b, x));
-    }
-    return b;
-}
-
 
 double inner_product(std::vector<double>::iterator first1,
                      std::vector<double>::iterator last1,
@@ -213,13 +144,4 @@ std::vector<double> matrix_mult(std::vector<std::vector<double>> a, std::vector<
         }
     }
     return c;
-}
-
-std::vector<double> projection(std::vector<std::vector<double>> B, std::vector<double> x, int i) {
-    const int n = x.size(); 
-    std::vector<double> p(n, 0);
-    for(int j = i; j < n; j++) {
-        p = vector_add(scalar_mult(inner_product(x.begin(), x.end(), B[j].begin()) / inner_product(B[j].begin(), B[j].end(), B[j].begin()), B[j]), p);
-    }
-    return p;
 }
