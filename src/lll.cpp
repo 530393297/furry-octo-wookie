@@ -89,7 +89,6 @@ std::vector<std::vector<double>> gram_schmidt(std::vector<std::vector<double>> a
 {
     const int n = a.size();
     std::vector<std::vector<double>> r(n, std::vector<double>(a[0].size()));
-    std::vector<std::vector<double>> q(n, std::vector<double>(a[0].size(), 0));
     std::vector<std::vector<double>> v(n, std::vector<double>(a[0].size(), 0));
     for(int i = 0; i < n; i++) {
         v[i] = a[i];
