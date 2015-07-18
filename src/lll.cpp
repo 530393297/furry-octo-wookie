@@ -41,59 +41,65 @@ int main()
 
 std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, double delta) {
     const int n = input.size();
+    const int m = input[0].size();
 
-    std::vector<std::vector<double>> B(n, std::vector<double>(input[0].size()));
-    gram_schmidt(input.begin(), input.size(), input[0].size(), B);
-    std::vector<std::vector<double>> l(n, std::vector<double>(input[0].size()));
+    std::vector<std::vector<double>> B(n, std::vector<double>(m));
+    std::vector<std::vector<double>> mu(n, std::vector<double>(m));
     
+    gram_schmidt(std::begin(input), B);
+    update_mu(std::begin(input), std::end(input), std::begin(B), std::end(B), mu);
 
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < input[0].size(); j++) {
-            l[i][j] = inner_product(input[i].begin(), input[i].end(), B[j].begin()) / inner_product(B[j].begin(), B[j].end(), B[j].begin());
-        }
-    }
-
-
-    int k = 1;
+    auto k = 1;
     while (k < n) {
         for(int j = k - 1; j >= 0; j--) {
-            if(fabs(l[k][j]) > 0.5) {
-                input[k] = vector_sub(input[k], scalar_mult(std::round(l[k][j]), input[j]));
-                std::vector<double> tt = scalar_mult(std::round(l[k][j]), input[j]);
-        
-            	gram_schmidt(input.begin(), input.size(), input[0].size(), B);
-                for(int ii = 0; ii < n; ii++) {
-                    for(int jj = 0; jj < input[0].size(); jj++) {
-                        l[ii][jj] = inner_product(input[ii].begin(), input[ii].end(), B[jj].begin()) / inner_product(B[jj].begin(), B[jj].end(), B[jj].begin());
-                    }
-                }
+            if(std::fabs(mu[k][j]) > 0.5) {
+                input[k] = vector_sub(input[k], scalar_mult(std::round(mu[k][j]), std::begin(input[j]), std::end(input[j])));
+            	gram_schmidt(std::begin(input), B);
+                update_mu(std::begin(input), std::end(input), std::begin(B), std::end(B), mu);
             }
         }
-        if(inner_product(B[k].begin(), B[k].end(), B[k].begin()) >= (delta - l[k][k-1] * l[k][k-1]) * inner_product(B[k -1].begin(), B[k -1].end(), B[k -1].begin())) {
+        if(inner_product(std::begin(B[k]), std::end(B[k]), std::begin(B[k])) >= (delta - mu[k][k-1] * mu[k][k-1]) * inner_product(B[k -1].begin(), B[k -1].end(), B[k -1].begin())) {
             k++;
         } else {
             input[k].swap(input[k -1]);
-            gram_schmidt(input.begin(), input.size(), input[0].size(), B);
-            for(int ii = 0; ii < n; ii++) {
-                for(int jj = 0; jj < input[0].size(); jj++) {
-                    l[ii][jj] = inner_product(input[ii].begin(), input[ii].end(), B[jj].begin()) / inner_product(B[jj].begin(), B[jj].end(), B[jj].begin());
-                }
-            }
+            gram_schmidt(std::begin(input), B);
+            update_mu(std::begin(input), std::end(input), std::begin(B), std::end(B), mu);
             k = std::max(k - 1, 1);
         }
     }
     return input;
 }
 
-
-void gram_schmidt(std::vector<std::vector<double>>::iterator __begin, int __n, int __m, std::vector<std::vector<double>> &__first2)
+void update_mu(std::vector<std::vector<double>>::iterator __first1,
+               std::vector<std::vector<double>>::iterator __last1,
+               std::vector<std::vector<double>>::iterator __first2,
+               std::vector<std::vector<double>>::iterator __last2,
+               std::vector<std::vector<double>> &__out) 
 {
-    auto first = __begin;    
+    auto j = 0;
+    
+    for(auto i = 0; __first1 != __last1; i++, ++__first1) {
+	j = 0;
+        for(auto inner = __first2; inner != __last2; j++, ++inner) {
+            auto begin = std::begin(*inner);
+            auto end = std::end(*inner); 
+            __out[i][j] = inner_product(std::begin(*__first1), std::end(*__first1), begin) / inner_product(begin, end, begin);
+        }
+    }
+}
 
-    for(auto i = 0; i < __n; i++, ++__begin) {
-        __first2[i] = *__begin;
-        for(auto inner = first; inner != __begin; ++inner) 
-            __first2[i] = vector_sub(*__begin, scalar_mult(inner_product(std::begin(*__begin), std::end(*__begin), std::begin(*inner)) / inner_product(std::begin(*inner), std::end(*inner), std::begin(*inner)), *inner));
+void gram_schmidt(std::vector<std::vector<double>>::iterator __first1, std::vector<std::vector<double>> &__out)
+{
+    auto first = __first1;    
+    int n = __out.size();
+
+    for(auto i = 0; i < n; i++, ++__first1) {
+        __out[i] = *__first1;
+        for(auto inner = first; inner != __first1; ++inner) { 
+	    auto begin = std::begin(*inner);
+            auto end = std::end(*inner);
+            __out[i] = vector_sub(*__first1, scalar_mult(inner_product(std::begin(*__first1), std::end(*__first1), begin) / inner_product(begin, end, begin), begin, end));
+        }
     }
 }
 
@@ -102,30 +108,36 @@ double inner_product(std::vector<double>::iterator __first1,
                      std::vector<double>::iterator __first2)
 {
     auto init = 0.0;
-    for (; __first1 != __last1; ++__first1, ++__first2)
+   
+     for (; __first1 != __last1; ++__first1, ++__first2)
         init = init + (*__first1 * *__first2);
 
     return init;
 }
 
-std::vector<double> scalar_mult(double a, std::vector<double> b)
+std::vector<double> scalar_mult(double __x, 
+                                std::vector<double>::iterator __first1,
+                                std::vector<double>::iterator __last1)
 {
-    std::vector<double> ans (b.size(), 0);
-    for(int i = 0; i < b.size(); i++) {
-        ans[i] = a * b[i];
-    }
-    return ans;
+    std::vector<double> out (std::distance(__first1, __last1), 0);
+    
+    for(auto i = 0; __first1 != __last1; i++, ++__first1) 
+        out[i] = __x * *__first1;
+    
+    return out;
 }
 
-std::vector<double> scalar_div(double a, std::vector<double> b)
+std::vector<double> scalar_div(double __x,
+                                std::vector<double>::iterator __first1,
+                                std::vector<double>::iterator __last1)
 {
-    std::vector<double> ans (b.size(), 0);
-    for(int i = 0; i < b.size(); i++) {
-        ans[i] = b[i] / a;
-    }
-    return ans;
-}
+    std::vector<double> out (std::distance(__first1, __last1), 0);
 
+    for(auto i = 0; __first1 != __last1; i++, ++__first1)
+        out[i] = __x / *__first1;
+
+    return out;
+}
 
 std::vector<double> vector_sub(std::vector<double> a, std::vector<double> b)
 {
