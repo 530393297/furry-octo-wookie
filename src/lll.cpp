@@ -19,11 +19,11 @@ int main()
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(1, 100);
-    /*std::vector<std::vector<double>> q(40, std::vector<double>(40));
-    for (int i = 0 ; i < 40; ++i)
-        for(int j = 0; j < 40; ++j)
+    std::vector<std::vector<double>> q(45, std::vector<double>(45));
+    for (int i = 0 ; i < 45; ++i)
+        for(int j = 0; j < 45; ++j)
             q[i][j] = dist(mt);
-    LLL(q, 0.75); */
+    LLL(q, 0.75); 
 
     std::vector<int> polya = {2, 5, 7};
     std::vector<int> polyb = {4,7, 5};
@@ -42,7 +42,8 @@ int main()
 std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, double delta) {
     const int n = input.size();
 
-    std::vector<std::vector<double>> B = gram_schmidt(input);
+    std::vector<std::vector<double>> B(n, std::vector<double>(input[0].size()));
+    gram_schmidt(input.begin(), input.size(), input[0].size(), B);
     std::vector<std::vector<double>> l(n, std::vector<double>(input[0].size()));
     
 
@@ -60,7 +61,7 @@ std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, dou
                 input[k] = vector_sub(input[k], scalar_mult(std::round(l[k][j]), input[j]));
                 std::vector<double> tt = scalar_mult(std::round(l[k][j]), input[j]);
         
-                B = gram_schmidt(input);
+            	gram_schmidt(input.begin(), input.size(), input[0].size(), B);
                 for(int ii = 0; ii < n; ii++) {
                     for(int jj = 0; jj < input[0].size(); jj++) {
                         l[ii][jj] = inner_product(input[ii].begin(), input[ii].end(), B[jj].begin()) / inner_product(B[jj].begin(), B[jj].end(), B[jj].begin());
@@ -72,7 +73,7 @@ std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, dou
             k++;
         } else {
             input[k].swap(input[k -1]);
-            B = gram_schmidt(input);
+            gram_schmidt(input.begin(), input.size(), input[0].size(), B);
             for(int ii = 0; ii < n; ii++) {
                 for(int jj = 0; jj < input[0].size(); jj++) {
                     l[ii][jj] = inner_product(input[ii].begin(), input[ii].end(), B[jj].begin()) / inner_product(B[jj].begin(), B[jj].end(), B[jj].begin());
@@ -85,28 +86,24 @@ std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, dou
 }
 
 
-std::vector<std::vector<double>> gram_schmidt(std::vector<std::vector<double>> a)
+void gram_schmidt(std::vector<std::vector<double>>::iterator __begin, int __n, int __m, std::vector<std::vector<double>> &__first2)
 {
-    const int n = a.size();
-    std::vector<std::vector<double>> r(n, std::vector<double>(a[0].size()));
-    std::vector<std::vector<double>> v(n, std::vector<double>(a[0].size(), 0));
-    for(int i = 0; i < n; i++) {
-        v[i] = a[i];
-        for(int j = 0; j < i; j++) {
-            r[i][j] = inner_product(a[i].begin(), a[i].end(), v[j].begin()) / inner_product(v[j].begin(), v[j].end(), v[j].begin());
-            v[i] = vector_sub(v[i], scalar_mult(r[i][j], v[j]));
-        }
+    auto first = __begin;    
+
+    for(int i = 0; i < __n; i++, ++__begin) {
+        __first2[i] = *__begin;
+        for(auto inner = first; inner != __begin; ++inner) 
+            __first2[i] = vector_sub(*__begin, scalar_mult(inner_product(std::begin(*__begin), std::end(*__begin), std::begin(*inner)) / inner_product(std::begin(*inner), std::end(*inner), std::begin(*inner)), *inner));
     }
-    return v;
 }
 
-double inner_product(std::vector<double>::iterator first1,
-                     std::vector<double>::iterator last1,
-                     std::vector<double>::iterator first2)
+double inner_product(std::vector<double>::iterator __first1,
+                     std::vector<double>::iterator __last1,
+                     std::vector<double>::iterator __first2)
 {
-    double init = 0;
-    for (; first1 != last1; ++first1, ++first2)
-        init = init + (*first1 * *first2);
+    auto init = 0.0;
+    for (; __first1 != __last1; ++__first1, ++__first2)
+        init = init + (*__first1 * *__first2);
 
     return init;
 }

@@ -8,7 +8,7 @@
 #include <random>
 
 double inner_product(std::vector<double>::iterator first1, std::vector<double>::iterator last1, std::vector<double>::iterator first2);
-std::vector<std::vector<double>> gram_schmidt(std::vector<std::vector<double>> a);
+void gram_schmidt(std::vector<std::vector<double>>::iterator a, int, int, std::vector<std::vector<double>> &__first2);
 std::vector<double> scalar_mult(double a, std::vector<double> b);
 std::vector<double> vector_sub(std::vector<double> a, std::vector<double> b);
 std::vector<double> scalar_div(double a, std::vector<double> b);

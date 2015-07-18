@@ -44,7 +44,7 @@ else
 endif
 
 # User flags
-EXTRA_CCFLAGS := -Wall -Wextra
+EXTRA_CCFLAGS := -pg -Wall -Wextra
 EXTRA_LDFLAGS :=
 
 ALL_CCFLAGS :=
