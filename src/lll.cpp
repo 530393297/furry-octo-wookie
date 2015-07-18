@@ -90,7 +90,7 @@ void gram_schmidt(std::vector<std::vector<double>>::iterator __begin, int __n, i
 {
     auto first = __begin;    
 
-    for(int i = 0; i < __n; i++, ++__begin) {
+    for(auto i = 0; i < __n; i++, ++__begin) {
         __first2[i] = *__begin;
         for(auto inner = first; inner != __begin; ++inner) 
             __first2[i] = vector_sub(*__begin, scalar_mult(inner_product(std::begin(*__begin), std::end(*__begin), std::begin(*inner)) / inner_product(std::begin(*inner), std::end(*inner), std::begin(*inner)), *inner));
