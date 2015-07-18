@@ -24,20 +24,8 @@ int main()
         for(int j = 0; j < 45; ++j)
             q[i][j] = dist(mt);
     LLL(q, 0.75); 
-
-    std::vector<int> polya = {2, 5, 7};
-    std::vector<int> polyb = {4,7, 5};
-
-    Polynomial a(polya);
-    Polynomial b(polyb);
-
-    Polynomial c = a.mod(2);
-
-    std::vector<int> polyc = c.get_coefficients();
-    for(int i = 0; i < polyc.size(); i++) 
-        std::cout << polyc[i] << ",";
-
 }
+
 
 std::vector<std::vector<double>> LLL(std::vector<std::vector<double>> input, double delta) {
     const int n = input.size();
@@ -127,18 +115,6 @@ std::vector<double> scalar_mult(double __x,
     return out;
 }
 
-std::vector<double> scalar_div(double __x,
-                                std::vector<double>::iterator __first1,
-                                std::vector<double>::iterator __last1)
-{
-    std::vector<double> out (std::distance(__first1, __last1), 0);
-
-    for(auto i = 0; __first1 != __last1; i++, ++__first1)
-        out[i] = __x / *__first1;
-
-    return out;
-}
-
 std::vector<double> vector_sub(std::vector<double> a, std::vector<double> b)
 {
     std::vector<double> ans (b.size(), 0);
@@ -146,24 +122,3 @@ std::vector<double> vector_sub(std::vector<double> a, std::vector<double> b)
         ans[i] = a[i] - b[i];
     }
     return ans;
-}
-
-std::vector<double> vector_add(std::vector<double> a, std::vector<double> b)
-{
-    std::vector<double> ans (b.size(), 0);
-    for(int i = 0; i < b.size(); i++) {
-        ans[i] = a[i] + b[i];
-    }
-    return ans;
-}
-
-std::vector<double> matrix_mult(std::vector<std::vector<double>> a, std::vector<double> b) 
-{
-    std::vector<double> c(a[0].size(), 0);
-    for(int i = 0; i < a.size(); i++) {
-        for(int j = 0; j < a[0].size(); j++) {
-            c[j] += a[i][j] * b[i]; 
-        }
-    }
-    return c;
-}
