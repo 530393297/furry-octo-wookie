@@ -10,7 +10,6 @@ Polynomial::Polynomial(std::vector<int> _coefficients) : degree(_coefficients.si
 
 Polynomial::Polynomial(const Polynomial &poly) : Polynomial(poly.get_coefficients())
 {
-
 }
 
 std::vector<int> Polynomial::get_coefficients() const

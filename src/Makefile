@@ -44,7 +44,7 @@ else
 endif
 
 # User flags
-EXTRA_CCFLAGS := -O3 -pedantic -Wall -Wextra
+EXTRA_CCFLAGS := -O3 -pedantic -Wall -Wextra -Werror -pedantic-errors
 EXTRA_LDFLAGS :=
 
 ALL_CCFLAGS :=
@@ -63,13 +63,16 @@ all: build
 
 build: lll
 
+main.o:main.cpp
+	$(EXEC) $(CC) $(INCLUDES) $(ALL_CCFLAGS) -o $@ -c $<
+
 lll.o:lll.cpp
 	$(EXEC) $(CC) $(INCLUDES) $(ALL_CCFLAGS) -o $@ -c $<
 
 polynomial.o:polynomial.cpp
 	$(EXEC) $(CC) $(INCLUDES) $(ALL_CCFLAGS) -o $@ -c $<
 
-lll:lll.o polynomial.o
+lll:lll.o polynomial.o main.o
 	$(EXEC) $(CC) $(ALL_LDFLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p ../bin/$(ARCH)/$(OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ ../bin/$(ARCH)/$(OS)/$(BUILD_TYPE)
