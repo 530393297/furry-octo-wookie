@@ -23,7 +23,7 @@ private:
                    std::vector<std::vector<double>>::const_iterator __last1,
                    std::vector<std::vector<double>>::const_iterator __first2,
                    std::vector<std::vector<double>>::const_iterator __last2,
-                   std::vector<std::vector<double>> &__out);
+                   std::vector<std::vector<double>>::iterator __out);
     double inner_product(std::vector<double>::const_iterator __first1,
                          std::vector<double>::const_iterator __last1,
                          std::vector<double>::const_iterator __first2);

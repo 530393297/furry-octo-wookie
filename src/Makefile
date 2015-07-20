@@ -40,11 +40,12 @@ ifeq ($(dbg),1)
     CCFLAGS += -g 
 	BUILD_TYPE := debug
 else
+	CCFLAGS += -O3
     BUILD_TYPE := release
 endif
 
 # User flags
-EXTRA_CCFLAGS := -O3 -pedantic -Wall -Wextra -Werror -pedantic-errors
+EXTRA_CCFLAGS := -pedantic -Wall -Wextra
 EXTRA_LDFLAGS :=
 
 ALL_CCFLAGS :=
@@ -72,7 +73,10 @@ lll.o:lll.cpp
 polynomial.o:polynomial.cpp
 	$(EXEC) $(CC) $(INCLUDES) $(ALL_CCFLAGS) -o $@ -c $<
 
-lll:lll.o polynomial.o main.o
+cs.o:coppersmith.cpp
+	$(EXEC) $(CC) $(INCLUDES) $(ALL_CCFLAGS) -o $@ -c $<
+
+lll:lll.o polynomial.o main.o cs.o
 	$(EXEC) $(CC) $(ALL_LDFLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p ../bin/$(ARCH)/$(OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ ../bin/$(ARCH)/$(OS)/$(BUILD_TYPE)

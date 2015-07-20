@@ -3,12 +3,13 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 class Polynomial {
 
 public:
     Polynomial(int _degree);
-    Polynomial(std::vector<int> coefficients);
+    Polynomial(std::vector<long> coefficients);
     Polynomial(const Polynomial &poly);
 
     Polynomial operator+ (const Polynomial& rhs);
@@ -17,16 +18,17 @@ public:
     Polynomial exp (int exp);
     Polynomial mod (int n);
 
-    int get_degree() {
-        return degree;
-    };
-    std::vector<int> get_coefficients() const;
+    int get_degree();
+    std::vector<long> get_coefficients() const;
 
-
+    Polynomial scalar_mult (const int __x);
+    Polynomial partial_evaluate (const int __b);
+    long evaluate(const int __x);
+    void pad (const int __x);
 
 private:
     int degree;
-    std::vector<int> coefficients;
+    std::vector<long> coefficients;
 
 };
 

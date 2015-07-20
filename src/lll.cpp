@@ -1,5 +1,7 @@
 #include "lll.h"
 
+#include <iostream>
+
 LLL::LLL(std::vector<std::vector<double>> __b) : _m(__b[0].size()), _n(__b.size()), _b(__b)
 {
 }
@@ -11,10 +13,11 @@ std::vector<std::vector<double>> LLL::solve(const double __delta)
     std::vector<std::vector<double>> b = _b;
 
     gram_schmidt(std::begin(b), B);
-    update_mu(std::begin(b), std::end(b), std::begin(B), std::end(B), mu);
+    update_mu(std::begin(b), std::end(b), std::begin(B), std::end(B), std::begin(mu));
 
     auto k = 1;
     while (k < _n) {
+        std::cout << k << std::endl;
         for(auto j = k - 1; j >= 0; j--) {
             if(std::fabs(mu[k][j]) > 0.5) {
                 b[k] = vector_sub(std::begin(b[k]), std::end(b[k]),
@@ -24,7 +27,7 @@ std::vector<std::vector<double>> LLL::solve(const double __delta)
                                                  std::end(b[j]))));
                 gram_schmidt(std::begin(b), B);
                 update_mu(std::begin(b), std::end(b), std::begin(B),
-                          std::end(B), mu);
+                          std::end(B), std::begin(mu));
             }
         }
         if(inner_product(
@@ -37,7 +40,7 @@ std::vector<std::vector<double>> LLL::solve(const double __delta)
             b[k].swap(b[k - 1]);
             gram_schmidt(std::begin(b), B);
             update_mu(std::begin(b), std::end(b), std::begin(B), std::end(B),
-                      mu);
+                      std::begin(mu));
             k = std::max(k - 1, 1);
         }
     }
@@ -70,16 +73,17 @@ void LLL::update_mu(std::vector<std::vector<double>>::const_iterator __first1,
                     std::vector<std::vector<double>>::const_iterator __last1,
                     std::vector<std::vector<double>>::const_iterator __first2,
                     std::vector<std::vector<double>>::const_iterator __last2,
-                    std::vector<std::vector<double>> &__out)
+                    std::vector<std::vector<double>>::iterator __out)
 {
-    for(auto i = 0; __first1 != __last1; i++, ++__first1) {
-        auto j = 0;
-        for(auto inner = __first2; inner != __last2; j++, ++inner) {
+
+    for(; __first1 != __last1; ++__out, ++__first1) {
+        auto elem = std::begin(*__out);
+        for(auto inner = __first2; inner != __last2; ++elem, ++inner) {
             auto begin = std::begin(*inner);
             auto end = std::end(*inner);
-            __out[i][j] = inner_product(std::begin(*__first1),
-                                        std::end(*__first1), begin) /
-                          inner_product(begin, end, begin);
+            *elem = inner_product(std::begin(*__first1),
+                                  std::end(*__first1), begin) /
+                    inner_product(begin, end, begin);
         }
     }
 }
