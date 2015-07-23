@@ -1,112 +1,109 @@
 import numpy as np
-import numpy.polynomial.polynomial as poly
+import decimal
+import scipy.optimize as scipy
+import functools as functools
+import random
 
-def matrix_mult(a, b):
-	c = [0] * len(a[0])
+def gram_schmidt(b):
+        B = b.copy()
+        for i in range(len(b)):
+                for j in range(i):
+                        B[i] = B[i] - ((np.inner(b[i], B[j]) / np.inner(B[j], B[j])) * B[j])
+        return B
 
-	for i in range(len(a)):
-		for j in range(len(a[0])):
-			c[j] = c[j] + (a[i][j] * b[i])
+def lll(b, delta):
+        B = gram_schmidt(b)
 
-	return c
+        for i in range(1, len(b)):
+                for j in reversed(range (i)):
+                        c = round(np.inner(b[i], B[j]) / np.inner(B[j], B[j]))
+                        b[i] = b[i] - (b[j] * c)
+        for i in range(len(b) - 1):
+                y = (np.inner(b[i + 1], B[i]) /  np.inner(B[i], B[i]) * B[i]) + B[i + 1]
+                if(delta * np.inner(B[i], B[i]) > np.inner(y, y)):
+                        b[[i, i + 1]] = b[[i + 1, i]]
+                        return lll(b, delta)
+        return b
 
-def vector_sub(a, b):
-	return [a[i] - b[i] for i in range(len(a))]
+def CopDeg2(a,b,N):
+        n = 1
+        TN = N >> 1
+        while TN != 0:
+                n = n + 1
+                TN = TN >> 1
+        X=pow(2, (n // 3 - 5))
+        M = np.array([(X * X, a * X, b), (0, N * X, 0), (0 ,0 ,N)])
 
-def vector_add(a, b):
-	return [a[i] + b[i] for i in range(len(a))]
+        V = lll(M, 0.75)
+        v = V[0]
+        return [v[i] / pow(X, (2 - i)) for i in range(3)]
 
-def scalar_mult(a, b):
-	return [i * a for i in b]
+def CopDeg3(a,b,c,N):
+        X = pow(N, 1 / 4.0) / 6
+        M = np.array([(X * X * X, a * X * X, b * X, c), (0, N * X * X, 0, 0), (0 ,0 ,N * X, 0), (0, 0, 0, N)])
 
-def inner_product(a, b):
-	c = 0
-
-	for i in range(len(a)):
-		c = c + a[i] * b[i]
-
-	return c
-
-def generate(N,C,e,m):
-	f = [0]*(e+1)
-	f[e] = 1
-	f[0] = -C
-	
-	x = [0,1]
-	g = []
-	for u in range(e):
-		temp = []
-		for v in range(m+1):
-			temp.append(poly.polymul([pow(N,m-v)], poly.polymul(poly.polypow(f,v), poly.polypow(x,u))).tolist())
-		g.append(temp)
-	return g
-
-def polypartial(f,B):
-	for i in range(len(f)):
-		f[i] = f[i]*pow(B,i)
-	return f
-
-def unpolypartial(f,B):
-	for i in range(len(f)):
-		f[i] = f[i]/pow(B,i)
-	return f
-
-def poly_pad(f, n):
-	g = [0]*n
-	for i in range(len(f)):
-		g[i] = f[i]
-	return g
-
-def generate_basis(g, d, m):
-	n = d * (m + 1)
-	B = pow(pow(n, 1 / d), m / (m + 1))
-
-	out = []
-
-	for u in range(d):
-		for v in range(m + 1):
-			out.append(poly_pad(polypartial(g[u][v], B), n)) 
-
-	return out
+        V = lll(M, 0.75)
+        v = V[0]
+        return [v[i] / pow(X, (3 - i)) for i in range(4)]
 
 
-def gram_schmidt(B):
-	Bs = list(B)
-	for i in range(len(B)):
-		for j in range(i):
-			Bs[i] = vector_sub(Bs[i], scalar_mult(inner_product(B[i], Bs[j]) / inner_product(B[j], Bs[j]), Bs[j]))
-	
-	return Bs
+def func3(f,x):
+	return x*x*x*f[0]+x*x*f[1]+f[2]*x+f[3]
 
-def LLL(B, delta):
-	Bs = gram_schmidt(B)
+def func2(f,x):
+	return x*x*f[0]+x*f[1]+f[2]
 
-	for i in range(1, len(B)):
-		for j in reversed(range (i)):
-			c = round(inner_product(B[i], Bs[j]) / inner_product(Bs[j], Bs[j]))
-			B[i] = vector_sub(B[i], scalar_mult(c, B[j]))
-	for i in range(len(B) - 1):
-		if delta * inner_product(Bs[i], Bs[i]) > inner_product(vector_add(scalar_mult(inner_product(B[i + 1], Bs[i]) /  inner_product(Bs[i], Bs[i]), Bs[i]), Bs[i+1]), vector_add(scalar_mult(inner_product(B[i + 1], Bs[i]) /  inner_product(Bs[i], Bs[i]), Bs[i]), Bs[i+1])):
-			temp = B[i]
-			B[i] = B[i + 1]
-			B[i + 1] = temp
-			return LLL(B, delta)
-	return B	
+#N = 1147
+#a = 1000
+#b = 1000
+#print("poly test 2:")
+#print(CopDeg2(a,b,N))
+#print("poly real answers:")
+#print("322,507,787,972")
+
+#N = 1147
+#a = 1000
+#b = 1000
+#c = 1000
+#print("poly test 3:")
+#print(CopDeg3(a,b,c,N))
+#print("poly real answers:")
+#print("443,598,660")
+
+#N = 1147
+#a = 1000
+#b = 1000
+#c = 259
+#f = CopDeg3(a,b,c,N)
+#print(f)
+#funcf = functools.partial(func3,f)
+#X = pow(N, 1 / 4.0) / 6
+#print(funcf(10))
+#print(scipy.brentq(funcf,0,X))
 
 
-c = [[1,1,1], [-1,0,2], [3,5,6]]
+#N = 2122840968903324034467344329510307845524745715398875789936591447337206598081
+#a = 3*pow(2,500)
+#b = 3*pow(2,500)*pow(2,500)
+#c = pow(2,500)*pow(2,500)*pow(2,500)-1792963459690600192400355988468130271248171381827462749870651408943993480816
+#print("RSA test:")
+#print(CopDeg3(a,b,c,N))
 
-cc = np.array([ (1,1,1), (-1,0,2), (3,5,6) ], dtype='f')
 
-N = 33
-e = 7
-m = 4
-M = 2
-C = 29
-d=e
-l = LLL(generate_basis(generate(N,C,d,m), d, m), 0.75)
-n = d * (m + 1)
-B = pow(pow(n, 1 / d), m / (m + 1))
-ll = unpolypartial(l[0],B)
-print(l)
-print(poly.polyval(M,ll[0])%N)
+p = 106859
+q = 106661
+Nn = p*q
+e = 3
+n = 1
+TN = Nn >> 1
+while TN != 0:
+    n = n + 1
+    TN = TN >> 1
+print(pow(2,n//3-10))
+x0 = random.randint(0,pow(2,n//3-10))
+a = random.randint(0,Nn)
+b = -x0*x0-a*x0%Nn
+print(x0)
+v = CopDeg2(a,b,Nn)
+funcv = functools.partial(func2,v)
+print(scipy.brentq(funcv,0,pow(2,n//3-10)))
