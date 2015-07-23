@@ -1,69 +1,59 @@
+import bisect
+import random
+from fractions import gcd
 
+def _try_composite(a, d, n, s):
+    if pow(a, d, n) == 1:
+        return False
+    for i in range(s):
+        if pow(a, 2**i * d, n) == n-1:
+            return False
+    return True
+ 
+def is_prime(n, _precision_for_huge_n=16):
+    if n in _known_primes or n in (0, 1):
+        return True
+    if any((n % p) == 0 for p in _known_primes):
+        return False
+    d, s = n - 1, 0
+    while not d % 2:
+        d, s = d >> 1, s + 1
+ 
+    if n < 1373653: 
+        return not any(_try_composite(a, d, n, s) for a in (2, 3))
+    if n < 25326001: 
+        return not any(_try_composite(a, d, n, s) for a in (2, 3, 5))
+    if n < 118670087467: 
+        if n == 3215031751: 
+            return False
+        return not any(_try_composite(a, d, n, s) for a in (2, 3, 5, 7))
+    if n < 2152302898747: 
+        return not any(_try_composite(a, d, n, s) for a in (2, 3, 5, 7, 11))
+    if n < 3474749660383: 
+        return not any(_try_composite(a, d, n, s) for a in (2, 3, 5, 7, 11, 13))
+    if n < 341550071728321: 
+        return not any(_try_composite(a, d, n, s) for a in (2, 3, 5, 7, 11, 13, 17))
+    # otherwise
+    return not any(_try_composite(a, d, n, s) 
+                   for a in _known_primes[:_precision_for_huge_n])
+ 
+_known_primes = [2, 3]
+_known_primes += [x for x in range(5, 1000, 2) if is_prime(x)]
 
-def is_prime(x):
-	for i in range(3, len(small_primes)):
-		p = small_primes[i]
-		q = x // p
-		if q < p:
-			return True
-		if x == q * p:
-			return False
-	i = 31
+def random_prime(n):
+	x = 4
+	while is_prime(x) == False:
+		x = random.randint(n/2,n)
+	return x
+
+def keygen(n = 256):
 	while True:
-		q = x // i
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 6
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 4
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 2
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 4
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 2
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 4
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 6
-		if q < i:
-			return True
-		if x == q * i:
-			return False
-		i = i + 2
-	
-def next_prime(n):
-	L = 30
-	if n <= small_primes[len(small_primes) - 1]:
-		return small_primes[bisect.bisect_left(small_primes, n)]
-	M = len(indices)
-	k0 = n // L
-	ind = bisect.bisect_left(indices, n - k0 * L) 
-	n = L * k0 + indices[ind]
-	while not is_prime(n):
-		ind = ind + 1
-		if ind == M:
-			k0 = k0 + 1
-			ind = 0
-		n = L * k0 + indices[ind]
-	return n
+		p = random_prime(pow(2, (n // 2)))
+		q = random_prime(pow(2, (n // 2)))
+		e = 3
+		if gcd(e, (p - 1) * (q - 1)) == 1:
+			break
+	Nn = p * q
+	return {'p': p, 'q': q ,'Nn': Nn, 'e': e}
+
+print(keygen(256))
