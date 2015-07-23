@@ -55,5 +55,3 @@ def keygen(n = 256):
 			break
 	Nn = p * q
 	return {'p': p, 'q': q ,'Nn': Nn, 'e': e}
-
-print(keygen(256))
