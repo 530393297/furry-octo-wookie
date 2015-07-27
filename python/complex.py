@@ -47,8 +47,7 @@ class ComplexDecimal(object):
             print "I SHOULDNT BE HERE"
 
         real = (1 / d.Decimal(2).sqrt()) * d.Decimal(
-            d.Decimal(
-                self.real * self.real + self.imag * self.imag).sqrt() + self.real).sqrt()
+            d.Decimal(self.real * self.real + self.imag * self.imag).sqrt() + self.real).sqrt()
         signb = 1
         if self.imag < 0:
             signb = d.Decimal(-1)
