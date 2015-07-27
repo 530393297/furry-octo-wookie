@@ -1,86 +1,95 @@
 import unittest
+import decimal as d
 import complex as c
 import math
 
-class ComplexTest(unittest.TestCase):
 
-	def test_add(self):
-		a = c.Complex(5, 6)
-		b = c.Complex(-3, 4)
-		d = a + b
-		self.assertEqual(d.i, 10)
-		self.assertEqual(d.r, 2)
+class ComplexDecimalTest(unittest.TestCase):
 
-	def test_sub(self):
-		a = c.Complex(5, 6)
-		b = c.Complex(-3, 4)
-		d = a - b
-		self.assertEqual(d.i, 2)
-		self.assertEqual(d.r, 8)
+    def decimal_almost_equals(self, lhs, rhs, epsilon=7):
+        epsilon = pow(10, -epsilon)
+        if abs(d.Decimal(lhs - rhs)) < epsilon:
+            return True
+        return False
 
-	def test_mult(self):
-		a = c.Complex(5, 6)
-		b = c.Complex(-3, 4)
-		d = a * b
-		self.assertEqual(d.i, 2)
-		self.assertEqual(d.r, -39)
+    def check_type(self, result):
+        if isinstance(result.real, d.Decimal) and isinstance(result.imag, d.Decimal):
+            return True
+        return False
 
-	def test_conjugate(self):
-		a = c.Complex(5, 6)
-		a = a.conjugate()
-		self.assertEqual(a.i, -6)
-		self.assertEqual(a.r, 5)
+    def check_answer(self, comp, real, imag, epsilon=7):
+        if self.decimal_almost_equals(comp.real, real, epsilon) is False:
+            return False
+        if self.decimal_almost_equals(comp.imag, imag, epsilon) is False:
+            return False
+        return True
 
-	def test_print(self):
-		a = c.Complex(5, 6)
-		ans = str(a)
-		self.assertEqual(ans, "5 + 6i")
-		a = c.Complex(5, 0)
-		ans = str(a)
-		self.assertEqual(ans, "5")
-		a = c.Complex(0, 6)
-		ans = str(a)
-		self.assertEqual(ans, "6i")
-		a = c.Complex(5, -6)
-		ans = str(a)
-		self.assertEqual(ans, "5 - 6i")
+    def test_add(self):
+        a = c.ComplexDecimal(5, 6)
+        b = c.ComplexDecimal(-3, 4)
+        result = a + b
+        self.assertTrue(self.check_answer(result, d.Decimal(2), d.Decimal(10)))
+        self.assertTrue(self.check_type(result))
 
-	def test_sin(self):
-		a = c.Complex(5, 6)
-		b = a.sin()
-		self.assertAlmostEqual(b.r, -193.4300200, 5)
-		self.assertAlmostEqual(b.i, 57.21839505, 5)
+    def test_sub(self):
+        a = c.ComplexDecimal(5, 6)
+        b = c.ComplexDecimal(-3, 4)
+        result = a - b
+        self.assertTrue(self.check_answer(result, d.Decimal(8), d.Decimal(2)))
+        self.assertTrue(self.check_type(result))
 
-	def test_cos(self):
-		a = c.Complex(5, 6)
-		b = a.cos()
-		self.assertAlmostEqual(b.r, 57.219098, 5)
-		self.assertAlmostEqual(b.i, 193.427643, 5)
+    def test_mult(self):
+        a = c.ComplexDecimal(5, 6)
+        b = c.ComplexDecimal(-3, 4)
+        result = a * b
+        self.assertTrue(
+            self.check_answer(result, d.Decimal(-39), d.Decimal(2)))
+        self.assertTrue(self.check_type(result))
 
-	def test_sqrt(self):
-		a = c.Complex(5, 6)
-		b = a.sqrt()
-		self.assertAlmostEqual(b.r, 2.53083, 5)
-		self.assertAlmostEqual(b.i, 1.18538, 5)
+    def test_div(self):
+        a = c.ComplexDecimal(5, 6)
+        b = c.ComplexDecimal(-3, 4)
+        result = a / b
+        self.assertTrue(
+            self.check_answer(result, d.Decimal(0.36), d.Decimal(-1.52)))
+        self.assertTrue(self.check_type(result))
 
-		a = c.Complex(5, 0)
-		b = a.sqrt()
-		self.assertAlmostEqual(b.r, 2.2360679, 5)
-		self.assertAlmostEqual(b.i, 0, 5)
+    def test_conjugate(self):
+        a = c.ComplexDecimal(5, 6)
+        result = a.conjugate()
+        self.assertTrue(self.check_answer(result, d.Decimal(5), d.Decimal(-6)))
+        self.assertTrue(self.check_type(result))
 
-		a = c.Complex(-5, 0)
-		b = a.sqrt()
-		self.assertAlmostEqual(b.i, 2.2360679, 5)
-		self.assertAlmostEqual(b.r, 0, 5)
+    def test_sqrt(self):
+        a = c.ComplexDecimal(5, 6)
+        result = a.sqrt()
+        self.assertTrue(
+            self.check_answer(result, d.Decimal(2.5083), d.Decimal(1.18538), 1))
 
-	def test_div(self):
-		a = c.Complex(5, 6)
-		b = c.Complex(-3, 4)
-		d = a / b
-		self.assertEqual(d.i, -1.52)
-		self.assertEqual(d.r, 0.36)
+        a = c.ComplexDecimal(5, 0)
+        result = a.sqrt()
+        self.assertTrue(
+            self.check_answer(result, d.Decimal(2.23667), d.Decimal(0), 1))
 
+        a = c.ComplexDecimal(-5, 0)
+        result = a.sqrt()
+        self.assertTrue(
+            self.check_answer(result, d.Decimal(0), d.Decimal(2.23667), 1))
+        self.assertTrue(self.check_type(result))
 
+    def test_print(self):
+        a = c.ComplexDecimal(5, 6)
+        ans = str(a)
+        self.assertEqual(ans, "5 + 6i")
+        a = c.ComplexDecimal(5, 0)
+        ans = str(a)
+        self.assertEqual(ans, "5")
+        a = c.ComplexDecimal(0, 6)
+        ans = str(a)
+        self.assertEqual(ans, "6i")
+        a = c.ComplexDecimal(5, -6)
+        ans = str(a)
+        self.assertEqual(ans, "5 - 6i")
 
 
 if __name__ == '__main__':

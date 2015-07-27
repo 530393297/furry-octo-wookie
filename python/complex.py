@@ -1,73 +1,60 @@
-import math
 import decimal as d
 
-class Complex:
-	def __init__(self, realpart, imagpart):
-		self.r = realpart
-		self.i = imagpart
 
-	def __add__(self, x):
-		real = self.r + x.r
-		imag = self.i + x.i
-		return Complex(real, imag)
+class ComplexDecimal(object):
 
-	def __sub__(self, x):
-		real = self.r - x.r
-		imag = self.i - x.i
-		return Complex(real, imag)
+    def __init__(self, real, imag):
+        self.real = d.Decimal(real)
+        self.imag = d.Decimal(imag)
 
-	def __mul__(self, x):
-		old = self.r
-		real = self.r * x.r - self.i * x.i
-		imag = old * x.i + self.i * x.r
-		return Complex(real, imag)
+    def __add__(self, rhs):
+        return ComplexDecimal(self.real + rhs.real, self.imag + rhs.imag)
 
-	def conjugate(self):
-		return Complex(self.r, -self.i)
+    def __sub__(self, rhs):
+        return ComplexDecimal(self.real - rhs.real, self.imag - rhs.imag)
 
-	def __str__(self):
-		if self.i == 0:
-			return str(self.r)
-		if self.r == 0:
-			return str(self.i) + "i"
-		if self.i < 0:
-			return str(self.r) + " - " + str(-self.i) + "i"
-		return str(self.r) + " + " + str(self.i) + "i"
+    def __mul__(self, rhs):
+        return ComplexDecimal(self.real * rhs.real - self.imag * rhs.imag,
+                              self.real * rhs.imag + self.imag * rhs.real)
 
-	def reciprocal(self):
-		scale = self.r * self.r + self.i * self.i
-		return Complex(self.r / scale, -self.i / scale)
+    def __truediv__(self, rhs):
+        return self * rhs.reciprocal()
 
-	def __truediv__(self, x):
-		return self * x.reciprocal()
+    def __str__(self):
+        if self.imag == 0:
+            return str(self.real)
+        if self.real == 0:
+            return str(self.imag) + "i"
+        if self.imag < 0:
+            return str(self.real) + " - " + str(-self.imag) + "i"
+        return str(self.real) + " + " + str(self.imag) + "i"
 
+    def conjugate(self):
+        return ComplexDecimal(self.real, -self.imag)
 
-	def sin(self):
-		return Complex(math.sin(self.r) * math.cosh(self.i), math.cos(self.r) * math.sinh(self.i))
+    def reciprocal(self):
+        scale = self.real * self.real + self.imag * self.imag
+        return ComplexDecimal(self.real / scale, -self.imag / scale)
 
-	def cos(self):
-		return Complex(math.cos(self.r) * math.cosh(self.i), -math.sin(self.r) * math.sinh(self.i))
+    def sqrt(self):
+        if self.imag == 0:
+            if self.real > 0:
+                return ComplexDecimal(self.real.sqrt(), 0)
+            else:
+                return ComplexDecimal(0, d.Decimal(-self.real).sqrt())
 
-	def sqrt(self):
-		if self.i == 0:
-			if self.r > 0:
-				return Complex(math.sqrt(self.r), 0)
-			else:
-				return Complex(0, math.sqrt(-self.r))
-		
-		if self.r == 0:
-			print("I SHOULDNT BE HERE")
-			return Complex(0, -math.sqrt(self.i))
-		
-		real = (1 / d.Decimal(2).sqrt()) * d.Decimal(d.Decimal(self.r * self.r + self.i * self.i).sqrt() + self.r).sqrt()
-		signb = 1
-		if self.i < 0:
-			signb = d.Decimal(-1)
-		imag =  (signb / d.Decimal(2).sqrt()) * d.Decimal(d.Decimal(self.r * self.r + self.i * self.i).sqrt() - self.r).sqrt()
-		return Complex(real, imag)
+        if self.real == 0:
+            print "I SHOULDNT BE HERE"
 
-
-
+        real = (1 / d.Decimal(2).sqrt()) * d.Decimal(
+            d.Decimal(
+                self.real * self.real + self.imag * self.imag).sqrt() + self.real).sqrt()
+        signb = 1
+        if self.imag < 0:
+            signb = d.Decimal(-1)
+        imag = (signb / d.Decimal(2).sqrt()) * d.Decimal(
+            d.Decimal(self.real * self.real + self.imag * self.imag).sqrt() - self.real).sqrt()
+        return ComplexDecimal(real, imag)
 
 
 if __name__ == "__main__":
