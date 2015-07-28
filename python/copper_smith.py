@@ -42,6 +42,8 @@ def gram_schmidt(basis):
     ortho = basis.copy()
     for i in range(len(basis)):
         for j in range(i):
+            #print(ortho[j])
+            print(inner(basis[i], ortho[j]))
             ortho[i] = sub(
                 ortho[i], mult(inner(basis[i], ortho[j]) / inner(ortho[j], ortho[j]), ortho[j]))
     return ortho
@@ -148,7 +150,7 @@ def poly_divmod(num, den):
         return [0], num
 
     quot = []
-    divisor = d.Decimal(den[-1])
+    divisor = c.ComplexDecimal(den[-1], 0)
     for i in range(shiftlen + 1):
         #Get the next coefficient of the quotient.
         mult = num[-1] / divisor
@@ -184,26 +186,26 @@ def generate(p, N, h, k, X):
 
 def power_iteration(basis):
     
-    b = [c.Complex(d.Decimal(random.random()), d.Decimal(random.random())) for _ in range(len(basis))]
-    norm_sq = c.Complex(d.Decimal(0), d.Decimal(0))
+    b = [c.ComplexDecimal(random.random(), random.random()) for _ in range(len(basis))]
+    norm_sq = c.ComplexDecimal(0, 0)
 
     for k in range(len(b)):
-        norm_sq += b[k] * b[k].conjugate()
+        norm_sq += b[k].size()
     norm = norm_sq.sqrt()
 
     b = div(norm, b)
 
-    out = [c.Complex(d.Decimal(0), d.Decimal(0))] * len(basis)
-    previous = c.Complex(d.Decimal(0), d.Decimal(0))
-    new = c.Complex(d.Decimal(1), d.Decimal(0))
+    out = [c.ComplexDecimal(0, 0)] * len(basis)
+    previous = c.ComplexDecimal(0, 0)
+    new = c.ComplexDecimal(1, 0)
 
-    for _ in range(100):
+    for _ in range(100000):
         for i in range(len(basis)):
-            out[i] = c.Complex(0, 0)
+            out[i] = c.ComplexDecimal(0, 0)
             for j in range(len(basis)):
                 out[i] = out[i] + basis[i][j].conjugate() * b[j]
 
-        norm_sq = c.Complex(d.Decimal(0), d.Decimal(0))
+        norm_sq = c.ComplexDecimal(0, 0)
         for k in range(len(basis)):
             norm_sq += out[k] * out[k].conjugate()
         norm = norm_sq.sqrt()
@@ -213,7 +215,7 @@ def power_iteration(basis):
         #print(1 / new)
         b = div(norm, out)
 
-    return new
+    return new, out
 
 
 def func(f, x):
@@ -231,11 +233,11 @@ def solve(p, X, N):
     return newton(p, x_init)
 
 def eigen_matrix(f):
-    out = [[c.Complex(d.Decimal(0), d.Decimal(0)) for _ in range(len(f) - 1)] for _ in range(len(f) - 1)]
+    out = [[c.ComplexDecimal(d.Decimal(0), d.Decimal(0)) for _ in range(len(f) - 1)] for _ in range(len(f) - 1)]
     for i in range(len(f) - 2):
-        out[i + 1][i] = c.Complex(1, 0)
+        out[i + 1][i] = c.ComplexDecimal(1, 0)
     for i in range(len(f) - 1):
-        out[0][i] = c.Complex(d.Decimal(-f[i + 1] / f[0]), 0)
+        out[0][i] = -f[i + 1] / f[0]
     return out
 
 
@@ -251,22 +253,40 @@ def find_n_roots(f, n):
 
     return [1 / i for i in ans]
 
-
+def mu_transpose(A,u, mu):
+    v = [[c.ComplexDecimal(0,0) for _ in range(len(u))]for _ in range(len(u))]
+    for i in range(len(u)):
+        for j in range(len(u)):
+            v[i][j] = A[i][j]-mu*u[i]*u[j].conjugate()
+    return v
 
 def run_copper_smith(f, N, h, k):
     X = math.ceil((pow(2, - 1 / 2) * pow(h * k, -1 / (h * k - 1))) * pow(N, (h - 1) / (h * k - 1))) - 1
     gen = lll(generate(f, N, h, k, X),  d.Decimal(0.75))
-    final_poly = [gen[0][i] / pow(X, i) for i in range(len(gen[0]))]
+    final_poly = [c.ComplexDecimal(gen[0][i] / pow(X, i), 0) for i in range(len(gen[0]))]
     
 
     out = [0] * (len(final_poly) - 1)
+    a = eigen_matrix(final_poly)
+    lamb, u = power_iteration(a)
+    print(c.ComplexDecimal(1,0)/lamb)
+    a = mu_transpose(a,u,c.ComplexDecimal(1,0)/lamb)
+    lamb, u = power_iteration(a)
+    print(c.ComplexDecimal(1,0)/lamb)
+    a = mu_transpose(a,u,c.ComplexDecimal(1,0)/lamb)
+    lamb, u = power_iteration(a)
+    print(c.ComplexDecimal(1,0)/lamb)
+    a = mu_transpose(a,u,c.ComplexDecimal(1,0)/lamb)
+    lamb, u = power_iteration(a)
+    print(c.ComplexDecimal(1,0)/lamb)
+    a = mu_transpose(a,u,c.ComplexDecimal(1,0)/lamb)
+    lamb, u = power_iteration(a)
+    print(c.ComplexDecimal(1,0)/lamb)
 
-
-    for i in range(len(final_poly) - 1):
-        print(final_poly)
-        out[i] = d.Decimal(1/round(power_iteration(eigen_matrix(final_poly))))
-        print(out[i])
-        final_poly = poly_divmod(final_poly, [-out[i],1])[0]
+#    for i in range(len(final_poly) - 1):
+#        out[i] = c.ComplexDecimal(1, 0)/ power_iteration(eigen_matrix(final_poly)) 
+#        print(out[i])
+#        final_poly = poly_divmod(final_poly, [-out[i].real, 1])[0]
 
 
     return out
@@ -274,3 +294,6 @@ def run_copper_smith(f, N, h, k):
 #f = [6, 5, 1]
 
 #print(find_n_roots(f, 2))
+
+inp = [[1,1,1], [-1,0,2], [3,5,6]]
+print(gram_schmidt(inp))

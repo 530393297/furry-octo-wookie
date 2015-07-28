@@ -123,7 +123,11 @@ class TestCopperSmithMethods(unittest.TestCase):
         N = 35
         f = [19, 14, 1]
         k = 2
-        print(cs.run_copper_smith(f, N, h, k))
+        cs.run_copper_smith(f, N, h, k)
+
+    #def test_mu_transpose(self):
+
+
 
     #def test_coron(self):
     #    N = 2122840968903324034467344329510307845524745715398875789936591447337206598081

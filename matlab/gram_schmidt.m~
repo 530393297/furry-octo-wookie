@@ -1,0 +1,13 @@
+function [ Q ] = gram_schmidt( A )
+    [m, n] = size(A);
+    Q = A;
+    
+    for i = 1:n
+        for j = 1:i - 1
+            inner1 = dot(A(i,:), Q(j,:));
+            inner2 = dot(Q(j,:), Q(j,:));
+            mult = (inner1 / inner2) * Q(j, :)
+        end
+    end
+end
+

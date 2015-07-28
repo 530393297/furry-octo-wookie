@@ -77,6 +77,18 @@ class ComplexDecimalTest(unittest.TestCase):
             self.check_answer(result, d.Decimal(0), d.Decimal(2.23667), 1))
         self.assertTrue(self.check_type(result))
 
+        a = c.ComplexDecimal(0, -2)
+        result = a.sqrt()
+        self.assertTrue(
+            self.check_answer(result, d.Decimal(1), d.Decimal(-1)))
+        self.assertTrue(self.check_type(result))
+
+        a = c.ComplexDecimal(0, 2)
+        result = a.sqrt()
+        self.assertTrue(
+            self.check_answer(result, d.Decimal(1), d.Decimal(1)))
+        self.assertTrue(self.check_type(result))
+
     def test_print(self):
         a = c.ComplexDecimal(5, 6)
         ans = str(a)

@@ -20,6 +20,9 @@ class ComplexDecimal(object):
     def __truediv__(self, rhs):
         return self * rhs.reciprocal()
 
+    def __neg__ (self):
+    	return ComplexDecimal(-self.real, -self.imag)
+
     def __str__(self):
         if self.imag == 0:
             return str(self.real)
@@ -36,6 +39,8 @@ class ComplexDecimal(object):
         scale = self.real * self.real + self.imag * self.imag
         return ComplexDecimal(self.real / scale, -self.imag / scale)
 
+    def size(self):
+    	return ComplexDecimal(self.real*self.real+self.imag*self.imag, 0)
     def sqrt(self):
         if self.imag == 0:
             if self.real > 0:
@@ -44,7 +49,10 @@ class ComplexDecimal(object):
                 return ComplexDecimal(0, d.Decimal(-self.real).sqrt())
 
         if self.real == 0:
-            print "I SHOULDNT BE HERE"
+          	if self.imag > 0:
+          		return ComplexDecimal((d.Decimal(2).sqrt() / 2) * self.imag.sqrt(), (d.Decimal(2).sqrt() / 2) * self.imag.sqrt())
+          	else:
+          		return ComplexDecimal((d.Decimal(2).sqrt() / 2) * d.Decimal(-self.imag).sqrt(), -(d.Decimal(2).sqrt() / 2) *  d.Decimal(-self.imag).sqrt())
 
         real = (1 / d.Decimal(2).sqrt()) * d.Decimal(
             d.Decimal(self.real * self.real + self.imag * self.imag).sqrt() + self.real).sqrt()
