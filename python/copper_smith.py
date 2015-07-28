@@ -42,8 +42,6 @@ def gram_schmidt(basis):
     ortho = basis.copy()
     for i in range(len(basis)):
         for j in range(i):
-            #print(ortho[j])
-            print(inner(basis[i], ortho[j]))
             ortho[i] = sub(
                 ortho[i], mult(inner(basis[i], ortho[j]) / inner(ortho[j], ortho[j]), ortho[j]))
     return ortho
@@ -58,6 +56,8 @@ def lll(basis, delta=0.75):
     """
     ortho = gram_schmidt(basis)
 
+    print("lll")
+
     for i in range(1, len(basis)):
         for j in reversed(range(i)):
             coefficient = round(
@@ -67,6 +67,7 @@ def lll(basis, delta=0.75):
         product = inner(ortho[i], ortho[i])
         lovasz_inner = add(
             mult(inner(basis[i + 1], ortho[i]) / product, ortho[i]), ortho[i + 1])
+        print(lovasz_inner)
         if delta * product > inner(lovasz_inner, lovasz_inner):
             basis[i], basis[i + 1] = basis[i + 1], basis[i]
             return lll(basis, delta)
@@ -296,4 +297,4 @@ def run_copper_smith(f, N, h, k):
 #print(find_n_roots(f, 2))
 
 inp = [[1,1,1], [-1,0,2], [3,5,6]]
-print(gram_schmidt(inp))
+print(lll(inp))
