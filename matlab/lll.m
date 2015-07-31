@@ -3,12 +3,12 @@ function [ b ] = lll( b, delta )
 B = gram_schmidt(b);
 
 for i = 2:length(b)
-    
     for j = i- 1:-1:1
         c = round(dot(b(i,:), B(j,:)) / dot(B(j,:), B(j,:)));
         b(i,:) = b(i,:) - (c * b(j,:));
     end
 end
+
 for i = 1:length(b) - 1
     l = ((dot(b(i + 1, :), B(i, :)) / dot(B(i,:), B(i,:))) * B(i,:)) ...
         + B(i + 1, :);

@@ -1,6 +1,7 @@
 function [ poly_mat ] = generate_poly( p, N, h, k, X )
+
 poly_mat = zeros(h * k);
-n = [N];
+n = N;
 x = [1, 0];
 
 for i = 1:h * k
@@ -10,8 +11,9 @@ for i = 1:h * k
     q = padarray(q, [0 ((h * k) - length(q))], 'pre');
     
     for j = 1:h * k
-        poly_mat(i, j) = q(h*k-j+1) * X ^ (j-1);
+        poly_mat(i, j) = q(h * k - j + 1) * X ^ (j - 1);
     end
 end
+
 end
 
