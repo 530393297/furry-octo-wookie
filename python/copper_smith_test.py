@@ -1,8 +1,6 @@
 import unittest
 import copper_smith as cs
-import rsa
-import random
-import decimal as d
+import sympy as s
 import math
 
 
@@ -73,11 +71,6 @@ class TestCopperSmithMethods(unittest.TestCase):
         ans = [[1, 9, 9], [13, 5, -7], [6, -9, 15]]
         self.assertEqual(cs.lll(data, 0.75), data)
 
-    def test_poly_deriv(self):
-        x = [13, 8, 1]
-        ans = [8, 2]
-        self.assertEqual(ans, cs.poly_derivative(x))
-
     def test_generate(self):
         h = 3
         N = 35
@@ -85,7 +78,7 @@ class TestCopperSmithMethods(unittest.TestCase):
         k = 2
         X = math.ceil(
             (pow(2, - 1 / 2) * pow(h * k, -1 / (h * k - 1))) * pow(N, (h - 1) / (h * k - 1))) - 1
-        # RUN
+
         degree = 2
         ans = [[1225.0, 0, 0, 0, 0, 0],
                [0.0, 2450.0, 0, 0, 0, 0],
@@ -116,20 +109,16 @@ class TestCopperSmithMethods(unittest.TestCase):
                    pow(2, 3), 14 * pow(2, 4), -4 * pow(2, 5)],
                [-201, 4 * 2, 33 * 2 * 2, -4 * pow(2, 3), -3 * pow(2, 4), 1 * pow(2, 5)]]
 
-        self.assertEqual(cs.lll(gen, d.Decimal(0.75)), ans)
+        self.assertEqual(cs.lll(gen), ans)
 
     def test_solve(self):
-        h = 3
-        N = 35
-        f = [19, 14, 1]
-        k = 2
+        h = s.S(3)
+        N = s.S(35)
+        f = [s.S(19), s.S(14), s.S(1)]
+        k = s.S(2)
         cs.run_copper_smith(f, N, h, k)
 
-    #def test_mu_transpose(self):
-
-
-
-    #def test_coron(self):
+    # def test_coron(self):
     #    N = 2122840968903324034467344329510307845524745715398875789936591447337206598081
     #    h = 3
     #    c = 1792963459690600192400355988468130271248171381827462749870651408943993480816
